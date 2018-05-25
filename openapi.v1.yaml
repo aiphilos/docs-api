@@ -1,0 +1,1013 @@
+openapi: 3.0.0
+info:
+  title: aiPhilos API
+  version: 1.0.0
+  contact:
+    name: API Support
+    url: 'https://aiphilos.com/'
+  termsOfService: 'https://aiphilos.com/'
+servers:
+  - url: 'https://api.aiphilos.com/v1'
+paths:
+  /languages:
+    parameters:
+      - $ref: '#/components/parameters/RefHeaderParameter'
+    get:
+      summary: Returns a list of supported languages
+      responses:
+        '200':
+          description: A JSON array of languages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Language'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+  /health:
+    parameters:
+      - $ref: '#/components/parameters/RefHeaderParameter'
+    get:
+      summary: Returns the current status (health) of the API
+      responses:
+        '200':
+          description: Current status (health) of the API
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+  /ratings:
+    parameters:
+      - $ref: '#/components/parameters/RefHeaderParameter'
+    post:
+      summary: "rates a certain request"
+      requestBody:
+              description: The score for a certain request
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/Score'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessWithMessageObject'
+        '404':
+          $ref: '#/components/responses/ErrorNotFoundResponse'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+  '/{language}/semantics/parse':
+    parameters:
+      - $ref: '#/components/parameters/RefHeaderParameter'
+      - $ref: '#/components/parameters/LanguageParameter'
+    get:
+      summary: Parses a single string
+      tags:
+        - semantics
+      parameters:
+        - name: query
+          in: query
+          description: Query String
+          required: true
+          allowEmptyValue: false
+          schema:
+            $ref: '#/components/schemas/Query'
+        - name: nlp_mode
+          in: query
+          description: Natural-Language-Processing (NLP) Mode
+          required: false
+          allowEmptyValue: false
+          schema:
+            $ref: '#/components/schemas/NlpMode'
+      responses:
+        '200':
+          $ref: '#/components/responses/SemanticsParseSingleResponse'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+    post:
+      summary: Parses a single string
+      tags:
+        - semantics
+      requestBody:
+        description: A query string to be parsed
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  $ref: '#/components/schemas/Query'
+                nlp_mode:
+                  $ref: '#/components/schemas/NlpMode'
+      responses:
+        '200':
+          $ref: '#/components/responses/SemanticsParseSingleResponse'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+  '/{language}/semantics/parsebatch':
+    parameters:
+      - $ref: '#/components/parameters/RefHeaderParameter'
+      - $ref: '#/components/parameters/LanguageParameter'
+    post:
+      summary: Parses multiple strings
+      tags:
+        - semantics
+      requestBody:
+        description: An array of multiple query strings and ids
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                queries:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      query:
+                        $ref: '#/components/schemas/Query'
+      responses:
+        '200':
+          $ref: '#/components/responses/SemanticsParseMultipleResponse'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+  '/{language}/items':
+    parameters:
+      - $ref: '#/components/parameters/RefHeaderParameter'
+      - $ref: '#/components/parameters/LanguageParameter'
+    get:
+      summary: Returns a list of available databases
+      tags:
+        - items
+      responses:
+        '200':
+          description: A JSON array of database names
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/MessageCodeObject'
+                  - type: object
+                    properties:
+                      results:
+                          type: array
+                          items:
+                            type: string
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+  '/{language}/items/{db}':
+    parameters:
+      - $ref: '#/components/parameters/RefHeaderParameter'
+      - $ref: '#/components/parameters/LanguageParameter'
+      - $ref: '#/components/parameters/DatabaseParameter'
+    get:
+      summary: 'Returns a list of items in a database'
+      tags:
+        - items
+      parameters:
+        - $ref: '#/components/parameters/ResultStart'
+        - $ref: '#/components/parameters/ResultSize'
+        - $ref: '#/components/parameters/ResultSort'
+        - $ref: '#/components/parameters/SortDir'
+        - $ref: '#/components/parameters/Unsorted'
+      responses:
+        '200':
+          $ref: '#/components/responses/GetItemsResponse'
+        '400':
+          $ref: '#/components/responses/ErrorBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/ErrorNotFoundResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+        '500':
+          $ref: '#/components/responses/ErrorWithMessageObject'
+    delete:
+      summary: Deletes a database
+      tags:
+        - items
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessWithMessageObject'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/ErrorNotFoundResponse'
+    head:
+      summary: 'Checks if a database exists'
+      tags:
+        - items
+      responses:
+        '200':
+          description: Database exists
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '404':
+          description: Database does not exist
+  '/{language}/items/{db}/search':
+    parameters:
+      - $ref: '#/components/parameters/LanguageParameter'
+      - $ref: '#/components/parameters/DatabaseParameter'
+      - $ref: '#/components/parameters/RefHeaderParameter'
+    get:
+      summary: 'Searches items in a database'
+      tags:
+        - items
+      parameters:
+        - $ref: '#/components/parameters/Query'
+        - $ref: '#/components/parameters/ResultStart'
+        - $ref: '#/components/parameters/ResultSize'
+        - $ref: '#/components/parameters/ResultSort'
+        - $ref: '#/components/parameters/SortDir'
+        - $ref: '#/components/parameters/Unsorted'
+        - $ref: '#/components/parameters/NLPMode'
+      responses:
+        '200':
+          $ref: '#/components/responses/GetItemsResponse'
+        '400':
+          $ref: '#/components/responses/ErrorBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/ErrorNotFoundResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+    post:
+      summary: 'Searches items in a database'
+      tags:
+        - items
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                from:
+                  $ref: '#/components/schemas/ItemFrom'
+                size:
+                  $ref: '#/components/schemas/ItemSize'
+                sort:
+                  $ref: '#/components/schemas/ItemSort'
+                order:
+                  $ref: '#/components/schemas/ItemOrder'
+                unsorted:
+                  $ref: '#/components/schemas/ItemUnsorted'
+                nlp_mode:
+                  $ref: '#/components/schemas/NlpMode'
+      responses:
+        '200':
+          $ref: '#/components/responses/GetItemsResponse'
+        '400':
+          $ref: '#/components/responses/ErrorBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/ErrorNotFoundResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+  '/{language}/items/{db}/scheme':
+    parameters:
+      - $ref: '#/components/parameters/LanguageParameter'
+      - $ref: '#/components/parameters/DatabaseParameter'
+      - $ref: '#/components/parameters/RefHeaderParameter'
+    get:
+      summary: 'Gets the scheme belonging to a database'
+      tags:
+        - items
+      responses:
+        '200':
+          $ref: '#/components/responses/GetSchemeResponse'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+    put:
+      summary: 'Updates the scheme belonging to a database'
+      tags:
+        - items
+      requestBody:
+        description: Object containing key-value pairs with keys referencing Item-fields and the value corresponding to allowed content types
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Schema'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessWithMessageObject'
+        '400':
+          $ref: '#/components/responses/ErrorBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+  '/{language}/items/{db}/batch':
+    post:
+      summary: 'Batch inserts/updates/deletes items in a database'
+      tags:
+        - items
+      parameters:
+        - $ref: '#/components/parameters/LanguageParameter'
+        - $ref: '#/components/parameters/DatabaseParameter'
+        - $ref: '#/components/parameters/RefHeaderParameter'
+      requestBody:
+        description: Array containing objects with key-value pairs. With keys referencing Item-fields and the value corresponding to allowed content types
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/BatchRequestResponse'
+        '400':
+          $ref: '#/components/responses/ErrorBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+  '/{language}/items/{db}/{id}':
+    parameters:
+      - $ref: '#/components/parameters/LanguageParameter'
+      - $ref: '#/components/parameters/DatabaseParameter'
+      - $ref: '#/components/parameters/ItemIDParameter'
+      - $ref: '#/components/parameters/RefHeaderParameter'
+    get:
+      summary: Shows details of an item
+      tags:
+        - items
+      responses:
+        '200':
+          $ref: '#/components/responses/GetItemResponse'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/ErrorNotFoundResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+    post:
+      summary: Creates an item
+      tags:
+        - items
+      requestBody:
+        description: The item to create
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          $ref: '#/components/responses/CreatedWithMessageObject'
+        '400':
+          $ref: '#/components/responses/ErrorBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+#@todo status 422
+    put:
+      summary: Updates or creates an item
+      tags:
+        - items
+      requestBody:
+        description: Values the Item is updated/created with
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessWithMessageObject'
+        '201':
+          $ref: '#/components/responses/CreatedWithMessageObject'
+        '400':
+          $ref: '#/components/responses/ErrorBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/ErrorNotFoundResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+    delete:
+      summary: Deletes an item
+      tags:
+        - items
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessWithMessageObject'
+        '401':
+          $ref: '#/components/responses/ErrorUnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/ErrorNotFoundResponse'
+        '405':
+          $ref: '#/components/responses/ErrorMethodNotAllowedResponse'
+        default:
+          $ref: '#/components/responses/ErrorWithMessageObject'
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  responses:
+    SuccessWithMessageObject:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MessageCodeObject'
+    ErrorWithMessageObject:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MessageCodeObject'
+    CreatedWithMessageObject:
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MessageCodeObject'
+    ErrorBadRequestResponse:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MessageCodeObject'
+    ErrorUnauthorizedResponse:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MessageCodeObject'
+    ErrorNotFoundResponse:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MessageCodeObject'
+    ErrorMethodNotAllowedResponse:
+      description: Method Not Allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MessageCodeObject'
+    SemanticsParseSingleResponse:
+      description: Result of semantic parsing
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                $ref: '#/components/schemas/Message'
+              messagecode:
+                $ref: '#/components/schemas/Messagecode'
+              uuid:
+                $ref: '#/components/schemas/ResponseUUID'
+              search:
+                type: string
+              predicate:
+                $ref: '#/components/schemas/Predicate'
+              constraints:
+                $ref: '#/components/schemas/ConstraintList'
+              modifiers:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SynsetContainer'
+              objects:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SynsetContainer'
+    SemanticsParseMultipleResponse:
+      description: Result of semantic parsing
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                $ref: '#/components/schemas/Message'
+              messagecode:
+                $ref: '#/components/schemas/Messagecode'
+              results:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    preditcate:
+                      $ref: '#/components/schemas/Predicate'
+                    modifiers:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/SynsetContainer'
+                    objects:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/SynsetContainer'
+    GetItemsResponse:
+      description: Object with a list of items
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/MessageCodeObject'
+              - $ref: '#/components/schemas/ItemListObject'
+    GetItemResponse:
+      description: Item object
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Item'
+    GetSchemeResponse:
+      description: Object containing key-value pairs with the value corresponding to allowed content types
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                $ref: '#/components/schemas/Message'
+              messagecode:
+                $ref: '#/components/schemas/Messagecode'
+              uuid:
+                $ref: '#/components/schemas/ResponseUUID'
+              results:
+                $ref: '#/components/schemas/Schema'
+    BatchRequestResponse:
+      description: Object containing key-value pairs plus the result of the batch operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                $ref: '#/components/schemas/Message'
+              messagecode:
+                $ref: '#/components/schemas/Messagecode'
+              uuid:
+                $ref: '#/components/schemas/ResponseUUID'
+              results:
+                $ref: '#/components/schemas/BatchResults'
+
+  parameters:
+    LanguageParameter:
+      name: language
+      in: path
+      description: Language
+      required: true
+      schema:
+        $ref: '#/components/schemas/Language'
+    SortDir:
+      name: order
+      in: query
+      description: Sort direction
+      required: false
+      allowEmptyValue: false
+      schema:
+        $ref: '#/components/schemas/ItemOrder'
+    ResultStart:
+      name: from
+      in: query
+      description: the number of found items that should be omitted when returning the result
+      required: false
+      allowEmptyValue: false
+      schema:
+        $ref: '#/components/schemas/ItemFrom'
+    ResultSize:
+      name: size
+      in: query
+      description: Max number of returned items
+      required: false
+      allowEmptyValue: false
+      schema:
+        $ref: '#/components/schemas/ItemSize'
+    ResultSort:
+      name: sort
+      in: query
+      description: the field by which to sort the results
+      required: false
+      allowEmptyValue: false
+      schema:
+        $ref: '#/components/schemas/ItemSort'
+    Unsorted:
+      name: unsorted
+      in: query
+      description: switch sorting on or off. false by default
+      required: false
+      allowEmptyValue: false
+      schema:
+        $ref: '#/components/schemas/ItemUnsorted'
+    NLPMode:
+      name: nlp_mode
+      in: query
+      description: Natural-Language-Processing (NLP) Mode
+      required: false
+      allowEmptyValue: false
+      schema:
+        $ref: '#/components/schemas/NlpMode'
+    Query:
+      name: query
+      in: query
+      description: Query String
+      required: true
+      allowEmptyValue: false
+      schema:
+        type: string
+    DatabaseParameter:
+      name: db
+      in: path
+      description: Database name
+      required: true
+      schema:
+        $ref: '#/components/schemas/DatabaseName'
+    ItemIDParameter:
+      name: id
+      in: path
+      description: Item ID
+      required: true
+      schema:
+        type: string
+    RefHeaderParameter:
+      name: X-AIPHILOS-REF
+      in: header
+      description: Refer UUID
+      required: false
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    Message:
+      type: string
+    Messagecode:
+      description: OK = 0; ERROR = 1
+      type: integer
+      format: int32
+      minimum: 0
+      maximum: 1
+    ResponseUUID:
+      description: UUID of the Response
+      type: string
+      format: uuid
+    MessageCodeObject:
+      type: object
+      properties:
+        message:
+          $ref: '#/components/schemas/Message'
+        messagecode:
+          $ref: '#/components/schemas/Messagecode'
+        uuid:
+          $ref: '#/components/schemas/ResponseUUID'
+    Score:
+      type: object
+      properties:
+        uuid:
+          $ref: '#/components/schemas/ResponseUUID'
+        score:
+          $ref: '#/components/schemas/ScoreProperty'
+        comment:
+          $ref: '#/components/schemas/Comment'
+    Comment:
+      description: additional scoring info
+      type: string
+    ScoreProperty:
+      description: score value
+      type: number
+      format: float
+      minimum: -100
+      maximum: +100
+    Predicate:
+      type: string
+    Head:
+      type: string
+    Lemma:
+      type: string
+    Lexeme:
+      type: string
+    WordCategory:
+      type: string
+      default: noun
+      enum:
+        - adjective
+        - noun
+        - verb
+    WordClass:
+      type: string
+      default: artifact
+      enum:
+        - general
+        - movement
+        - feeling
+        - spirit
+        - society
+        - body
+        - quantity
+        - phenomenon
+        - place
+        - pertainyms
+        - perception
+        - privative
+        - relation
+        - substance
+        - behaviour
+        - time
+        - artifact
+        - attribute
+        - possession
+        - form
+        - event
+        - group
+        - cognition
+        - communication
+        - person
+        - motive
+        - nourishment
+        - object
+        - plant
+        - animal
+        - tops
+        - bodyfunction
+        - competition
+        - contact
+        - location
+        - creation
+        - change
+        - consumption
+    NamedEntityType:
+      type: string
+      nullable: true
+      enum:
+        - undefined
+        - person
+        - norp
+        - facility
+        - org
+        - gpe
+        - loc
+        - product
+        - event
+        - work_of_art
+        - language
+        - colour
+        - trademark
+    BatchResults:
+      type: array
+      items:
+        anyOf:
+          - $ref: '#/components/schemas/BatchResultIndexed'
+          - $ref: '#/components/schemas/BatchResultFailed'
+          - $ref: '#/components/schemas/BatchResultDeleted'
+    BatchResultFailed:
+      type: object
+      properties:
+        Failed:
+          type : array
+          items:
+            $ref: '#/components/schemas/BatchItemResult'
+    BatchResultIndexed:
+      type: object
+      properties:
+        Indexed:
+          type : array
+          items:
+            $ref: '#/components/schemas/BatchItemResult'
+    BatchResultDeleted:
+      type: object
+      properties:
+        Deleted:
+          type : array
+          items:
+            $ref: '#/components/schemas/BatchItemResult'
+    BatchItemResult:
+      type: object
+      properties:
+        id:
+          type: string
+        result:
+          $ref: '#/components/schemas/BatchItemResultEnums'
+    BatchRequest:
+      type : object
+      properties:
+        items :
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchItem'
+    BatchItem :
+      type: object
+      description: 'Additional underscore prefixes are not allowed'
+      minProperties: 1
+      maxProperties: 256
+      properties:
+        _id:
+          type: string
+        _action:
+          type : string
+          enum:
+             - POST
+             - PUT
+             - DELETE
+      additionalProperties:
+        anyOf:
+          - type: integer
+            format: in64
+          - type: number
+            format: double
+          - type: string
+            minLength: 0
+            maxLength: 64000
+          - type: boolean
+#          - type: array
+#            items:
+#              anyOf:
+#              - type: integer
+#              - type: number
+#              - type: string
+#              - type: boolean
+    Synset:
+      type: object
+      properties:
+        synset_id:
+          type: integer
+          format: int32
+        hypernyms:
+          type: array
+          items:
+            type: string
+        hyponyms:
+          type: array
+          items:
+            type: string
+        synonyms:
+          type: array
+          items:
+            type: string
+        word_category:
+          $ref: '#/components/schemas/WordCategory'
+        word_class:
+          $ref: '#/components/schemas/WordClass'
+        named_entity_type:
+          $ref: '#/components/schemas/NamedEntityType'
+    SynsetContainer:
+      type: object
+      properties:
+        head:
+          $ref: '#/components/schemas/Head'
+        lemma:
+          $ref: '#/components/schemas/Lemma'
+        lexeme:
+          $ref: '#/components/schemas/Lexeme'
+        modifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Synset'
+        objects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Synset'
+    Item:
+      type: object
+      description: 'Underscore prefixes are not allowed'
+      minProperties: 1
+      maxProperties: 256
+      properties:
+        _id:
+          type: string
+      additionalProperties:
+        anyOf:
+          - type: integer
+            format: in64
+          - type: number
+            format: double
+          - type: string
+            minLength: 0
+            maxLength: 64000
+          - type: boolean
+#          - type: array
+#            items:
+#              anyOf:
+#              - type: integer
+#              - type: number
+#              - type: string
+#              - type: boolean
+    ItemList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Item'
+    ItemListObject:
+      type: object
+      properties:
+        count:
+          type: integer
+        total:
+          type: integer
+        results:
+          $ref: '#/components/schemas/ItemList'
+    Constraint:
+      type: object
+    ConstraintList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Constraint'
+    NlpMode:
+      type: string
+      default: auto
+      enum:
+        - auto
+        - 'on'
+        - 'off'
+    DatabaseName:
+      type: string
+      minLength: 3
+      maxLength: 255
+      pattern: '^(?!^aiphilos$)((?!-|_)([a-zA-Z0-9-_]+?[a-zA-Z0-9])+)(?!_|-)$'
+    Schema:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/ItemPropertyContentType'
+    ItemPropertyContentType:
+      type: string
+      enum:
+        - general.auto
+        - general.off
+        - general.raw
+        - product.number
+        - product.name
+        - product.category
+        - product.description
+        - product.price
+        - product.gtin
+        - product.manufacturer
+        - product.manufacturer_number
+        - product.modifier
+        - product.object
+        - product.stock
+        - product.supplier
+        - product.supplier_number
+        - product.rating
+        - product.state
+        - order.frequency
+    Language:
+      type: string
+      enum:
+        - de-de
+    Query:
+      type: string
+      minLength: 3
+    ItemSort:
+      type: string
+    ItemOrder:
+      type: string
+      enum:
+        - asc
+        - desc
+    ItemUnsorted:
+      type: boolean
+      default: false
+    ItemFrom:
+      type: integer
+      minimum: 0
+      default: 0
+    ItemSize:
+      type: integer
+      default: 10
+    BatchItemResultEnums:
+      type: string
+      enum:
+        - created
+        - updated
+        - deleted
+tags:
+  - name: default
+    description: non-language and non-database specific endpoints
+  - name: semantics
+    description: Semantic parsing
+  - name: items
+    description: Item and database handling
+security:
+  - basicAuth: []
