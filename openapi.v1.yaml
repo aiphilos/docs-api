@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: aiPhilos API
-  version: 1.0.0
+  version: 1.1.0
   contact:
     name: API Support
     url: 'https://aiphilos.com/'
@@ -241,6 +241,8 @@ paths:
         - $ref: '#/components/parameters/SortDir'
         - $ref: '#/components/parameters/Unsorted'
         - $ref: '#/components/parameters/NLPMode'
+        - $ref: '#/components/parameters/SearchMode'
+        - $ref: '#/components/parameters/FieldFilter'
       responses:
         '200':
           $ref: '#/components/responses/GetItemsResponse'
@@ -277,6 +279,10 @@ paths:
                   $ref: '#/components/schemas/ItemUnsorted'
                 nlp_mode:
                   $ref: '#/components/schemas/NlpMode'
+                mode:
+                  $ref: '#/components/schemas/SearchMode'
+                filter:
+                  $ref: '#/components/schemas/FieldFilter'
       responses:
         '200':
           $ref: '#/components/responses/GetItemsResponse'
@@ -632,6 +638,14 @@ components:
       allowEmptyValue: false
       schema:
         $ref: '#/components/schemas/NlpMode'
+    SearchMode:
+      name: mode
+      in: query
+      description: Searching Mode
+      required: false
+      allowEmptyValue: false
+      schema:
+        $ref: '#/components/schemas/SearchMode'
     Query:
       name: query
       in: query
@@ -662,6 +676,14 @@ components:
       schema:
         type: string
         format: uuid
+    FieldFilter:
+      name: filter
+      in: query
+      description: Comma separated list with filtered fields
+      required: false
+      allowEmptyValue: false
+      schema:
+        $ref: '#/components/schemas/FieldFilter'
   schemas:
     Message:
       type: string
@@ -941,6 +963,16 @@ components:
         - auto
         - 'on'
         - 'off'
+    SearchMode:
+      type: string
+      default: auto
+      enum:
+        - auto
+        - 'combined'
+        - 'semantic'
+        - 'classic'
+    FieldFilter:
+      type: string
     DatabaseName:
       type: string
       minLength: 3
