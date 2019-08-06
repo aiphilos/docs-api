@@ -991,7 +991,9 @@ components:
             - item
             - autocorrection
         value:
-          type: string
+          oneOf:
+            - type: string
+            - $ref: '#/components/schemas/Item'
     Constraint:
       type: object
     ConstraintList:
