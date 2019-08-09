@@ -1,13 +1,14 @@
 openapi: 3.0.0
 info:
   title: aiPhilos API
-  version: 1.1.0
+  version: 1.2.0
   contact:
     name: API Support
     url: 'https://aiphilos.com/'
   termsOfService: 'https://aiphilos.com/'
 servers:
   - url: 'https://api.aiphilos.com/v1'
+  - url: 'https://api.dev.aiphilos.com/v1'
 paths:
   /languages:
     parameters:
@@ -243,9 +244,10 @@ paths:
         - $ref: '#/components/parameters/NLPMode'
         - $ref: '#/components/parameters/SearchMode'
         - $ref: '#/components/parameters/FieldFilter'
+        - $ref: '#/components/parameters/SuggestionsInput'
       responses:
         '200':
-          $ref: '#/components/responses/GetItemsResponse'
+          $ref: '#/components/responses/GetSearchResponse'
         '400':
           $ref: '#/components/responses/ErrorBadRequestResponse'
         '401':
@@ -283,9 +285,11 @@ paths:
                   $ref: '#/components/schemas/SearchMode'
                 filter:
                   $ref: '#/components/schemas/FieldFilter'
+                suggestions:
+                  $ref: '#/components/schemas/SuggestionsInput'
       responses:
         '200':
-          $ref: '#/components/responses/GetItemsResponse'
+          $ref: '#/components/responses/GetSearchResponse'
         '400':
           $ref: '#/components/responses/ErrorBadRequestResponse'
         '401':
@@ -537,6 +541,15 @@ components:
                       type: array
                       items:
                         $ref: '#/components/schemas/SynsetContainer'
+    GetSearchResponse:
+      description: Object with a list of items and additional information
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/MessageCodeObject'
+              - $ref: '#/components/schemas/SuggestionListObject'
+              - $ref: '#/components/schemas/ItemListObject'
     GetItemsResponse:
       description: Object with a list of items
       content:
@@ -601,7 +614,7 @@ components:
     ResultStart:
       name: from
       in: query
-      description: the number of found items that should be omitted when returning the result
+      description: The number of found items that should be omitted when returning the result
       required: false
       allowEmptyValue: false
       schema:
@@ -617,7 +630,7 @@ components:
     ResultSort:
       name: sort
       in: query
-      description: the field by which to sort the results
+      description: The field by which to sort the results
       required: false
       allowEmptyValue: false
       schema:
@@ -625,7 +638,7 @@ components:
     Unsorted:
       name: unsorted
       in: query
-      description: switch sorting on or off. false by default
+      description: Switch sorting on or off. false by default
       required: false
       allowEmptyValue: false
       schema:
@@ -684,6 +697,14 @@ components:
       allowEmptyValue: false
       schema:
         $ref: '#/components/schemas/FieldFilter'
+    SuggestionsInput:
+      name: suggestions
+      in: query
+      description: Flag for suggestions
+      required: false
+      allowEmptyValue: false
+      schema:
+        $ref: '#/components/schemas/SuggestionsInput'
   schemas:
     Message:
       type: string
@@ -950,6 +971,29 @@ components:
           type: integer
         results:
           $ref: '#/components/schemas/ItemList'
+    SuggestionsInput:
+      type: boolean
+      default: true
+    SuggestionListObject:
+      type: object
+      properties:
+        suggestions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Suggestion'
+    Suggestion:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - autocomplete
+            - item
+            - autocorrection
+        value:
+          oneOf:
+            - type: string
+            - $ref: '#/components/schemas/Item'
     Constraint:
       type: object
     ConstraintList:
