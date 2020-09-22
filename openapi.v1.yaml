@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: aiPhilos API
-  version: 1.2.0
+  version: 1.3.0
   contact:
     name: API Support
     url: 'https://aiphilos.com/'
@@ -245,6 +245,10 @@ paths:
         - $ref: '#/components/parameters/SearchMode'
         - $ref: '#/components/parameters/FieldFilter'
         - $ref: '#/components/parameters/SuggestionsInput'
+        - $ref: '#/components/parameters/CustomerUserId'
+        - $ref: '#/components/parameters/CustomerSessionId'
+        - $ref: '#/components/parameters/CustomerGroupId'
+        - $ref: '#/components/parameters/SearchTrigger'
       responses:
         '200':
           $ref: '#/components/responses/GetSearchResponse'
@@ -287,6 +291,14 @@ paths:
                   $ref: '#/components/schemas/FieldFilter'
                 suggestions:
                   $ref: '#/components/schemas/SuggestionsInput'
+                cuid:
+                  $ref: '#/components/schemas/CustomerUserId'
+                csid:
+                  $ref: '#/components/schemas/CustomerSessionId'
+                cgid:
+                  $ref: '#/components/schemas/CustomerGroupId'
+                trigger:
+                  $ref: '#/components/schemas/SearchTrigger'
       responses:
         '200':
           $ref: '#/components/responses/GetSearchResponse'
@@ -705,6 +717,38 @@ components:
       allowEmptyValue: false
       schema:
         $ref: '#/components/schemas/SuggestionsInput'
+    CustomerUserId:
+      name: cuid
+      in: query
+      description: Customer User ID
+      required: false
+      allowEmptyValue: true
+      schema:
+        $ref: '#/components/schemas/CustomerUserId'
+    CustomerSessionId:
+      name: csid
+      in: query
+      description: Customer Session ID
+      required: false
+      allowEmptyValue: true
+      schema:
+        $ref: '#/components/schemas/CustomerSessionId'
+    CustomerGroupId:
+      name: cgid
+      in: query
+      description: Customer Group ID
+      required: false
+      allowEmptyValue: true
+      schema:
+        $ref: '#/components/schemas/CustomerGroupId'
+    SearchTrigger:
+      name: trigger
+      in: query
+      description: Trigger
+      required: false
+      allowEmptyValue: true
+      schema:
+        $ref: '#/components/schemas/SearchTrigger'
   schemas:
     Message:
       type: string
@@ -1075,6 +1119,29 @@ components:
         - created
         - updated
         - deleted
+    CustomerUserId:
+      description: Customer User ID
+      type: string
+      maxLength: 255
+      nullable: true
+    CustomerSessionId:
+      description: Customer Session ID
+      type: string
+      maxLength: 255
+      nullable: true
+    CustomerGroupId:
+      description: Customer Group ID
+      type: string
+      maxLength: 255
+      nullable: true
+    SearchTrigger:
+      description: Trigger
+      type: string
+      nullable: true
+      enum:
+        - submit
+        - auto
+        - navigation
 tags:
   - name: default
     description: non-language and non-database specific endpoints
